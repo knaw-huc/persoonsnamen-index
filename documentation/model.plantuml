@@ -1,0 +1,42 @@
+@startuml
+
+' hide the spot
+hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity "Person" as p {
+  *_id : number <<generated>>
+  --
+  *name : text,
+  givename: text
+  life_hint_begin: text
+  life_hint_end: text
+}
+
+entity "record" as r {
+  *_id : number <<generated>>
+  --
+  * id
+}
+
+entity "database" as db{
+  *_id : number <<generated>>
+  --
+  * name: text
+  ` waar leeft de database, etc
+ }
+
+entity "link" as l {
+  *_id : number <<generated>>
+  --
+  href: anyURI
+}
+
+p ||-|{ r
+r }|..|| db
+r }|..o{ l
+
+@enduml
+
