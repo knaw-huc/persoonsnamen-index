@@ -17,7 +17,6 @@ from roman import InvalidRomanNumeralError;
 # (https://foss.heptapod.net/openpyxl)
 
 output = None
-schema_out = None
 delimiter = ','
 quotechar = ''
 pattern = re.compile(r'([^(]*)\(([^)]*)\)([^(]*)')
@@ -89,45 +88,31 @@ def xls_file(filename, headerrow=0):
             links.append([f"{teller}",row[headers.index('url')].value])
             teller += 1
 
-    schema_out.write(f'COPY persons ({", ".join(cols.values())}, record_nr) FROM stdin;\n')
+    output.write(f'COPY persons ({", ".join(cols.values())}, record_nr) FROM stdin;\n')
     for person in persons:
-        schema_out.write("\t".join(person) + "\n")
-    schema_out.write("\\.\n\n")
+        output.write("\t".join(person) + "\n")
+    output.write("\\.\n\n")
 
-    schema_out.write(f'COPY records (_id,id,url_id) FROM stdin;\n')
+    output.write(f'COPY records (_id,id,url_id) FROM stdin;\n')
     for record in records:
-        schema_out.write("\t".join(record) + "\n")
-    schema_out.write("\\.\n\n")
+        output.write("\t".join(record) + "\n")
+    output.write("\\.\n\n")
 
-    schema_out.write(f'COPY links (_id,href) FROM stdin;\n')
+    output.write(f'COPY links (_id,href) FROM stdin;\n')
     for link in links:
-        schema_out.write("\t".join(link) + "\n")
-    schema_out.write("\\.\n\n")
+        output.write("\t".join(link) + "\n")
+    output.write("\\.\n\n")
 
-def string_to_dict(text):
-    text_spl = str(text).split('+')
-    for i in range(0,len(text_spl)):
-        text_spl[i] = str(text_spl[i]).strip().replace(' ', '_')
-    text = "+".join(text_spl)
-    res = ''
-    try:
-        res = '[' + patt.sub(r'"\1"', text) + ']'
-        res = res.replace(r"+", ",").replace('(','[').replace(')',']').replace("_",' ')
-        return json.loads(res)
-    except TypeError:
-        return json.loads('["' + str(res) + '"]')
-    except json.decoder.JSONDecodeError:
-        return None
 
 
 def create_table(table, columns,foreign=''):
-     schema_out.write(f"DROP TABLE IF EXISTS {table} CASCADE;\n")
-     schema_out.write(f"CREATE TABLE {table} (\n    ")
-     schema_out.write(f"_id SERIAL PRIMARY KEY,\n    ")
+     output.write(f"DROP TABLE IF EXISTS {table} CASCADE;\n")
+     output.write(f"CREATE TABLE {table} (\n    ")
+     output.write(f"_id SERIAL PRIMARY KEY,\n    ")
      if len(columns)>0:
-         schema_out.write(" TEXT,\n    ".join(columns))
-         schema_out.write(f" TEXT")
-     schema_out.write(f"{foreign}\n);\n\n")
+         output.write(" TEXT,\n    ".join(columns))
+         output.write(f" TEXT")
+     output.write(f"{foreign}\n);\n\n")
 
 
 def stderr(text="",nl="\n"):
@@ -143,9 +128,6 @@ def arguments():
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
                     default = f"schutte_data_{today}.sql" )
-    ap.add_argument('-s', '--schema',
-                    help="schema file",
-                    default = f"schutte_schema_{today}.sql" )
     ap.add_argument('-q', '--quotechar',
                     help="quotechar",
                     default = "'" )
@@ -167,12 +149,10 @@ if __name__ == "__main__":
     args = arguments()
     inputfile = args['inputfile']
     outputfile = args['outputfile']
-    schemafile = args['schema']
     headerrow = args['headerrow']
     quotechar = args['quotechar']
 
     output = open(outputfile, "w", encoding="utf-8")
-    schema_out = open(schemafile, "w", encoding="utf-8")
  
     xls_file(inputfile)
     
