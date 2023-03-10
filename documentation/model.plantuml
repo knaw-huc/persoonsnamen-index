@@ -25,7 +25,7 @@ entity "database" as db{
   *_id : number <<generated>>
   --
   * name: text
-  ` waar leeft de database, etc
+  ' waar leeft de database, etc
  }
 
 entity "link" as l {
