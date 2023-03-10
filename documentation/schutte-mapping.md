@@ -2,7 +2,7 @@ based on schutte_buitenland_met_lemma.xlsx and our model
 
 for this mapping
 1. create a database:
-- name = "Schutte"
+  - name = "Schutte"
 
 for each row:
 1. create a person
