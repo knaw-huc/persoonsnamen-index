@@ -114,21 +114,15 @@ if __name__ == "__main__":
                     cols = recs[idx].split("','")
                     id = cols[0][1:]
                     name = f'{cols[4]} {cols[5]}'.strip()
-                    if teller==85:
-                        stderr(name)
                     name = re.sub(r"\\'","'",name)
                     name = re.sub(r'\\"','"',name)
                     name = re.sub(r"(\\n|\\r)"," ",name)
-                    if teller==85:
-                        stderr(name)
                     givenname = cols[3]
                     givenname = re.sub(r"(\\n|\\r)"," ",givenname)
                     life_hint_begin = cols[6]
                     life_hint_end = cols[10]
                     href = f'https://switch.sd.di.huc.knaw.nl/raa/persoon/{id}'
                     new_row = [id,name,givenname,life_hint_begin,life_hint_end,f"{teller}"]
-                    if teller==85:
-                        stderr(new_row)
                     persons.append(new_row)
                     records.append([f"{teller}",id,f"{teller}"])
                     links.append([f"{teller}",href])
@@ -144,9 +138,6 @@ if __name__ == "__main__":
 
     output.write(f'COPY persons (_id,name,givenname,life_hint_begin,life_hint_end,record_nr) FROM stdin;\n')
     for person in persons:
-        row = "\t".join(person)
-        if row.startswith('85\t'):
-             stderr(row)
         output.write("\t".join(person) + "\n")
     output.write("\\.\n\n")
 
