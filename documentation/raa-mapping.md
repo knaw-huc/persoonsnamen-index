@@ -12,5 +12,6 @@ for each row:
   - life_hint_end = overlijdensdatum
 2. create a record
   - id = id
+  - link dat record aan de RAA database
 3. create a link
   - href = https://switch.sd.di.huc.knaw.nl/raa/persoon/{id} 

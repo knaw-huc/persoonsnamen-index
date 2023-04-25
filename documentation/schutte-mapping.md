@@ -12,5 +12,6 @@ for each row:
   - life_hint_end = schutte_eindjaar
 2. create a record
   - id = schutte_nr
+  - link dat record aan de Schutte database
 3. create a link
   - href = url 
