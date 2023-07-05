@@ -130,9 +130,9 @@ if __name__ == "__main__":
 
     output = open(outputfile, "w", encoding="utf-8")
     teller = 1
-    foreign_keys = ',\n    record_nr integer REFERENCES records (_id)'
+    foreign_keys = ',\n    record_nr integer' # REFERENCES records (_id)'
     create_table('persons',['name','givenname','life_hint_begin','life_hint_end'],foreign_keys)
-    foreign_keys = ',\n    url_id integer REFERENCES links(_id)'
+    foreign_keys = ',\n    url_id integer' # REFERENCES links(_id)'
     create_table('records',['id'],foreign_keys)
     create_table('links',['href'])
 
@@ -150,6 +150,11 @@ if __name__ == "__main__":
     for link in links:
         output.write("\t".join(link) + "\n")
     output.write("\\.\n\n")
-    
+ 
+    output.write('''ALTER TABLE persons ADD FOREIGN KEY (record_nr) REFERENCES records;
+
+ALTER TABLE records ADD FOREIGN KEY (url_id) REFERENCES links;
+''')
+
     end_prog(0)
 

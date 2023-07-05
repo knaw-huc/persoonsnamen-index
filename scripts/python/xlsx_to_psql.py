@@ -64,9 +64,9 @@ def xls_file(filename, headerrow=0):
     pp.pprint(headers,indent=4)
 
     teller = 1
-    foreign_keys = ',\n    record_nr integer REFERENCES records (_id)'
+    foreign_keys = ',\n    record_nr integer' # REFERENCES records (_id)'
     create_table('persons',cols.values(),foreign_keys)
-    foreign_keys = ',\n    url_id integer REFERENCES links(_id)'
+    foreign_keys = ',\n    url_id integer' # REFERENCES links(_id)'
     create_table('records',['id'],foreign_keys)
     create_table('links',['href'])
 
@@ -102,6 +102,15 @@ def xls_file(filename, headerrow=0):
     for link in links:
         output.write("\t".join(link) + "\n")
     output.write("\\.\n\n")
+
+    # foreign keys
+
+    output.write('''  
+ALTER TABLE persons ADD FOREIGN KEY (record_nr) REFERENCES records;
+
+ALTER TABLE records ADD FOREIGN KEY (url_id) REFERENCES links;
+''')
+
 
 
 
