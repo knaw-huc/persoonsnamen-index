@@ -5,10 +5,6 @@ from datetime import datetime
 import re
 import sys
 import xlrd 
-import json
-import pprint as pp
-import roman;
-from roman import InvalidRomanNumeralError;
 
 # This script uses xlrd to read xlsx files.
 # According to https://xlrd.readthedocs.io/en/latest/index.html :
@@ -73,7 +69,7 @@ def arguments():
     ap = argparse.ArgumentParser(description='Read schutte xlsx to make postgres import file')
     ap.add_argument('-i', '--inputfile',
                     help="inputfile",
-                    default = "../../input/RAA_Dump20211011.sql" )
+                    default = "input/RAA_Dump20211011.sql" )
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
                     default = f"raa_data_{today}.sql" )
@@ -100,7 +96,8 @@ if __name__ == "__main__":
     persons = []
     records = []
     links = []
-    teller = 1
+    record_links = []
+    teller = 1000
     with open(inputfile , 'r', encoding='utf-8') as f:
         for line in f:
             if line.startswith('INSERT INTO `persoon`'):
@@ -112,49 +109,54 @@ if __name__ == "__main__":
                     recs[idx] = re.sub(r'^(\d+),',r"'\1',",recs[idx])
                     recs[idx] = re.sub('NULL',"'NULL'",recs[idx])
                     cols = recs[idx].split("','")
-                    id = cols[0][1:]
-                    name = f'{cols[4]} {cols[5]}'.strip()
+                    id_link = cols[0][1:]
+                    id = f'{teller}'
+                    name = f'{cols[5]}'.strip()
                     name = re.sub(r"\\'","'",name)
                     name = re.sub(r'\\"','"',name)
                     name = re.sub(r"(\\n|\\r)"," ",name)
+                    infix = f'{cols[4]}'.strip()
+                    infix = re.sub(r"\\'","'",infix)
+                    infix = re.sub(r'\\"','"',infix)
+                    infix = re.sub(r"(\\n|\\r)"," ",infix)
                     givenname = cols[3]
                     givenname = re.sub(r"(\\n|\\r)"," ",givenname)
                     life_hint_begin = cols[6]
                     life_hint_end = cols[10]
-                    href = f'https://switch.sd.di.huc.knaw.nl/raa/persoon/{id}'
-                    new_row = [id,name,givenname,life_hint_begin,life_hint_end,f"{teller}"]
+                    href = f'https://switch.sd.di.huc.knaw.nl/raa/persoon/{id_link}'
+                    #                    
+                    new_row = [id,name,infix,givenname,life_hint_begin,life_hint_end]
                     persons.append(new_row)
-                    records.append([f"{teller}",id,f"{teller}"])
-                    links.append([f"{teller}",href])
+                    records.append([id,f'{id}',f"{teller}","1" ])
+                    links.append([f'{teller}',href])
+                    record_links.append([f"{teller}",f"{teller}"])
                     teller += 1
 
     output = open(outputfile, "w", encoding="utf-8")
-    teller = 1
-    foreign_keys = ',\n    record_nr integer' # REFERENCES records (_id)'
-    create_table('persons',['name','givenname','life_hint_begin','life_hint_end'],foreign_keys)
-    foreign_keys = ',\n    url_id integer' # REFERENCES links(_id)'
-    create_table('records',['id'],foreign_keys)
-    create_table('links',['href'])
 
-    output.write(f'COPY persons (_id,name,givenname,life_hint_begin,life_hint_end,record_nr) FROM stdin;\n')
-    for person in persons:
-        output.write("\t".join(person) + "\n")
+    output.write(f'COPY database (_id,name) FROM stdin;\n')
+    output.write('1\t"RAA"\n')
     output.write("\\.\n\n")
 
-    output.write(f'COPY records (_id,id,url_id) FROM stdin;\n')
-    for record in records:
-        output.write("\t".join(record) + "\n")
+    output.write(f'COPY persons (_id,name,infix,givenname,life_hint_begin,life_hint_end) FROM stdin;\n')
+    for person in persons:
+        output.write("\t".join(person) + "\n")
     output.write("\\.\n\n")
 
     output.write(f'COPY links (_id,href) FROM stdin;\n')
     for link in links:
         output.write("\t".join(link) + "\n")
     output.write("\\.\n\n")
- 
-    output.write('''ALTER TABLE persons ADD FOREIGN KEY (record_nr) REFERENCES records;
 
-ALTER TABLE records ADD FOREIGN KEY (url_id) REFERENCES links;
-''')
+    output.write(f'COPY records (_id,id,person_id,database_id) FROM stdin;\n')
+    for record in records:
+        output.write("\t".join(record) + "\n")
+    output.write("\\.\n\n")
+
+    output.write(f'COPY record_links (record_id,link_id) FROM stdin;\n')
+    for record in record_links:
+        output.write("\t".join(record) + "\n")
+    output.write("\\.\n\n")
 
     end_prog(0)
 
