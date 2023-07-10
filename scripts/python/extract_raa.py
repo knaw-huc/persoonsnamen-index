@@ -5,12 +5,6 @@ import re
 import sys
 
 output = None
-quotechar = ''
-pattern = re.compile(r'([^(]*)\(([^)]*)\)([^(]*)')
-pattern_2 = re.compile(r'([^[]*)\[([^]]*)]([^[]*)')
-patt = re.compile(r'([^+)(\][]+)')
-long_lat_patt = re.compile(r"([NSEW]) (\d+)° (\d+)' (\d+)'?'?")
-manuscript_ids = []
 
 
 '''
@@ -55,9 +49,6 @@ def arguments():
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
                     default = f"raa_data_{today}.sql" )
-    ap.add_argument('-q', '--quotechar',
-                    help="quotechar",
-                    default = "'" )
     args = vars(ap.parse_args())
     return args
 
@@ -73,7 +64,6 @@ if __name__ == "__main__":
     args = arguments()
     inputfile = args['inputfile']
     outputfile = args['outputfile']
-    quotechar = args['quotechar']
 
     persons = []
     records = []
