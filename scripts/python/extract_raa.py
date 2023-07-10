@@ -1,19 +1,10 @@
 # -*- coding: utf-8 -*-
 import argparse
-import csv
 from datetime import datetime
 import re
 import sys
-import xlrd 
-
-# This script uses xlrd to read xlsx files.
-# According to https://xlrd.readthedocs.io/en/latest/index.html :
-# 'This library will no longer read anything other than .xls files'
-# In future a conversion to another library might be nescessary, for example: openpyxl
-# (https://foss.heptapod.net/openpyxl)
 
 output = None
-delimiter = ','
 quotechar = ''
 pattern = re.compile(r'([^(]*)\(([^)]*)\)([^(]*)')
 pattern_2 = re.compile(r'([^[]*)\[([^]]*)]([^[]*)')
@@ -49,15 +40,6 @@ for each row:
     * href = https://switch.sd.di.huc.knaw.nl/raa/persoon/{id}
 '''
 
-
-def create_table(table, columns,foreign=''):
-     output.write(f"DROP TABLE IF EXISTS {table} CASCADE;\n")
-     output.write(f"CREATE TABLE {table} (\n    ")
-     output.write(f"_id SERIAL PRIMARY KEY,\n    ")
-     if len(columns)>0:
-         output.write(" TEXT,\n    ".join(columns))
-         output.write(f" TEXT")
-     output.write(f"{foreign}\n);\n\n")
 
 
 def stderr(text="",nl="\n"):
