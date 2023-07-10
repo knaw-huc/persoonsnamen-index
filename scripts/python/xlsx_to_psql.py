@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 import argparse
-import csv
 from datetime import datetime
 import re
 import sys
 import xlrd 
-import json
 import pprint as pp
-import roman;
-from roman import InvalidRomanNumeralError;
 
 # This script uses xlrd to read xlsx files.
 # According to https://xlrd.readthedocs.io/en/latest/index.html :
@@ -19,11 +15,6 @@ from roman import InvalidRomanNumeralError;
 output = None
 delimiter = ','
 quotechar = ''
-pattern = re.compile(r'([^(]*)\(([^)]*)\)([^(]*)')
-pattern_2 = re.compile(r'([^[]*)\[([^]]*)]([^[]*)')
-patt = re.compile(r'([^+)(\][]+)')
-long_lat_patt = re.compile(r"([NSEW]) (\d+)° (\d+)' (\d+)'?'?")
-manuscript_ids = []
 
 cols = { 'name' : 'name',
          'givenname' : 'givenname', 
@@ -61,41 +52,39 @@ def xls_file(filename, headerrow=0):
 #
     sheet = wb.sheet_by_index(0)
     headers = [str(cell.value) for cell in sheet.row(0)]
-    pp.pprint(headers,indent=4)
+    #pp.pprint(headers,indent=4)
 
     teller = 1
-    foreign_keys = ',\n    record_nr integer' # REFERENCES records (_id)'
-    create_table('persons',cols.values(),foreign_keys)
-    foreign_keys = ',\n    url_id integer' # REFERENCES links(_id)'
-    create_table('records',['id'],foreign_keys)
-    create_table('links',['href'])
-
     persons = []
     records = []
     links = []
-
+    record_links = []
+    last_id = ''
     for rownum in range(sheet.nrows)[1:-1]:
         row = sheet.row(rownum)
-        new_row = []
         #if rownum<5 or rownum>683:
             #stderr(rownum)
+        id = row[headers.index('schutte_nr')].value 
+        if id==last_id:
+            continue
+        last_id = id
+        new_row = [f'{id}']
         for col in cols.keys():
             new_row.append(row[headers.index(col)].value)
-        new_row.append(f"{teller}")
         if len(new_row)>0:
             persons.append(new_row)
-            records.append([f"{teller}",row[headers.index('schutte_nr')].value,f"{teller}"])
+            records.append([f"{teller}",f"{teller}",f'{id}','2'])
             links.append([f"{teller}",row[headers.index('url')].value])
+            record_links.append([f"{teller}",f"{teller}"])
             teller += 1
 
-    output.write(f'COPY persons ({", ".join(cols.values())}, record_nr) FROM stdin;\n')
-    for person in persons:
-        output.write("\t".join(person) + "\n")
+    output.write(f'COPY database (_id,name) FROM stdin;\n')
+    output.write('2\t"Schutte"\n')
     output.write("\\.\n\n")
 
-    output.write(f'COPY records (_id,id,url_id) FROM stdin;\n')
-    for record in records:
-        output.write("\t".join(record) + "\n")
+    output.write(f'COPY persons (_id,{", ".join(cols.values())}) FROM stdin;\n')
+    for person in persons:
+        output.write("\t".join(person) + "\n")
     output.write("\\.\n\n")
 
     output.write(f'COPY links (_id,href) FROM stdin;\n')
@@ -103,26 +92,15 @@ def xls_file(filename, headerrow=0):
         output.write("\t".join(link) + "\n")
     output.write("\\.\n\n")
 
-    # foreign keys
+    output.write(f'COPY records (_id,id,person_id,database_id) FROM stdin;\n')
+    for record in records:
+        output.write("\t".join(record) + "\n")
+    output.write("\\.\n\n")
 
-    output.write('''  
-ALTER TABLE persons ADD FOREIGN KEY (record_nr) REFERENCES records;
-
-ALTER TABLE records ADD FOREIGN KEY (url_id) REFERENCES links;
-''')
-
-
-
-
-def create_table(table, columns,foreign=''):
-     output.write(f"DROP TABLE IF EXISTS {table} CASCADE;\n")
-     output.write(f"CREATE TABLE {table} (\n    ")
-     output.write(f"_id SERIAL PRIMARY KEY,\n    ")
-     if len(columns)>0:
-         output.write(" TEXT,\n    ".join(columns))
-         output.write(f" TEXT")
-     output.write(f"{foreign}\n);\n\n")
-
+    output.write(f'COPY record_links (record_id,link_id) FROM stdin;\n')
+    for record in record_links:
+        output.write("\t".join(record) + "\n")
+    output.write("\\.\n\n")
 
 def stderr(text="",nl="\n"):
     sys.stderr.write(f"{text}{nl}")
@@ -133,7 +111,7 @@ def arguments():
     ap = argparse.ArgumentParser(description='Read schutte xlsx to make postgres import file')
     ap.add_argument('-i', '--inputfile',
                     help="inputfile",
-                    default = "../../input/schutte_buitenland_met_lemma.xlsx" )
+                    default = "input/schutte_buitenland_met_lemma.xlsx" )
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
                     default = f"schutte_data_{today}.sql" )
