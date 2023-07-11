@@ -46,9 +46,8 @@ function publish($passage, $url)
     //curl_setopt($ch, CURLOPT_VERBOSE, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $response = curl_exec($ch);
-    echo $response;
+    //echo $response;
     curl_close($ch);
-    //echo "$id indexed\n";
 }
 
 function indexItems($count)
@@ -59,20 +58,27 @@ function indexItems($count)
     foreach ($items as $item) {
         $item = build_item($item);
         publish($item, INDEX_URL);
-        print_r($item);
+        $id = $item["id"];
+        echo "$id indexed\n";
+        //print_r($item);
     }
 }
 
-function build_item($sport_item)
+function build_item($item)
 {
     global $db;
 
-    $item = $sport_item;
-    $id = $sport_item["id"];
-    $item["sports"] = $db->get_sports($id);
-    $item["provincie"] = $db->get_province($id);
-    $item["landelijk"] = $db->get_landelijk($id);
-    $item["lokaal"] = $db->get_lokaal($id);
+    $id = $item["id"];
+    $givenname = $item["givenname"];
+    $infix = $item["infix"];
+    $name = $item["name"];
+    if (is_null($infix) || strlen(trim($infix)) == 0) {
+        $item["fullname"] = $givenname.' '.$name;
+    } else {
+        $item["fullname"] = $givenname.' '.$infix.' '.$name;
+    }
+   
+    $item["databases"] =  $db->get_database($id);
     return $item;
 }
 
