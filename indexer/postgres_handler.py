@@ -51,7 +51,7 @@ class Db:
 
     def get_persons(self):
         cur = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT name,infix,givenname FROM persons")
+        cur.execute("SELECT name,infix,givenname,life_hint_begin,life_hint_end FROM persons")
         records = cur.fetchall()
         print(len(records))
         return records

@@ -89,6 +89,8 @@ def index_persons():
         name = elem['name']
         givenname = elem['givenname']
         infix = elem['infix']
+        life_hint_begin = elem['life_hint_begin']
+        life_hint_end = elem['life_hint_end']
         if not infix or infix == '':
             if givenname:
                 fullname = f'{givenname} {name}'
@@ -98,7 +100,10 @@ def index_persons():
             fullname = f'{givenname} {infix} {name}'
 #        print(fullname)
         idx.add_to_index({"name": fullname.strip()})
-        # iets met life_hint_begin en life_hint_end ?
+        if life_hint_begin and life_hint_begin!='':
+            idx.add_to_index({"life_hint_begin": fullname.strip()})
+        if life_hint_end and life_hint_end!='':
+            idx.add_to_index({"life_hint_end": fullname.strip()})
         teller += 1
     return jsonify({'result': f'{teller} names indexed'})
 
