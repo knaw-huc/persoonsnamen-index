@@ -51,7 +51,9 @@ class Db:
 
     def get_persons(self):
         cur = self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute("SELECT name,infix,givenname FROM persons")
+        cur.execute("SELECT name,infix,givenname,life_hint_begin,life_hint_end FROM persons")
+
+        cur.execute("select persons.name as name,infix,givenname,life_hint_begin,life_hint_end,database.name as database from persons,records,database where records.person_id=persons._id and database_id=database._id")
         records = cur.fetchall()
         print(len(records))
         return records

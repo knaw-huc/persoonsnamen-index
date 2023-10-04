@@ -82,13 +82,16 @@ def get_detail():
 @app.route('/index', methods=['GET'])
 def index_persons():
     res = db.get_persons()
-    print(f'index {len(res}} persons') 
+    print(f'index {len(res)} persons') 
     idx = Indexer(config)
     teller = 0
     for elem in res:
         name = elem['name']
         givenname = elem['givenname']
         infix = elem['infix']
+        life_hint_begin = elem['life_hint_begin']
+        life_hint_end = elem['life_hint_end']
+        database = elem['database']
         if not infix or infix == '':
             if givenname:
                 fullname = f'{givenname} {name}'
@@ -96,9 +99,17 @@ def index_persons():
                 fullname = f'{name}'
         else:
             fullname = f'{givenname} {infix} {name}'
-#        print(fullname)
-        idx.add_to_index({"name": fullname.strip()})
-        # iets met life_hint_begin en life_hint_end ?
+#        print(f'''name: {name} - fullname: {fullname.strip()} - life_hint_begin: {life_hint_begin} - life_hint_end: {life_hint_end} - database: {database}
+#''')
+        data = {"fullname": fullname.strip()}
+        data["name"] = name.strip()
+        if life_hint_begin and life_hint_begin!='':
+            data["life_hint_begin"] = life_hint_begin
+        if life_hint_end and life_hint_end!='':
+            data["life_hint_end"] = life_hint_end
+        if database and database!='':
+            data["database"] = database
+        idx.add_to_index(data)
         teller += 1
     return jsonify({'result': f'{teller} names indexed'})
 
