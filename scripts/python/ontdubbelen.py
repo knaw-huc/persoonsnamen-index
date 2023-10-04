@@ -105,11 +105,15 @@ if __name__ == "__main__":
             givenname = row['voornaam']
             life_hint_begin = row['geboortejaar']
             life_hint_end = row['sterfjaar']
-            record_id = db_command(cur,"SELECT _id FROM records WHERE id = %s",[row['schutte_nr']])
-            db_command(cur,"DELETE FROM persons WHERE record_nr = %s",[row['schutte_nr']])
-            record_id = db_command(cur,"SELECT _id FROM records WHERE id=%s",[row['id']])
-            db_command(cur,"DELETE FROM persons WHERE record_nr = %s",[row['id']])
-            db_command(cur,"INSERT INTO persons (name, infix, givenname, life_hint_begin, life_hint_end, record_nr) VALUES (%s,%s,%s,%s,%s,%s)",[naam,infix,givenname,life_hint_begin,life_hint_end,record_id]);
+            db_command(cur,"INSERT INTO persons (name, infix, givenname, life_hint_begin, life_hint_end) VALUES (%s,%s,%s,%s,%s)",[naam,infix,givenname,life_hint_begin,life_hint_end])
+            cur.execute('SELECT LASTVAL()')
+            person_id = cur.fetchone()[0]
+            schutte = db_command(cur,"SELECT _id,person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name=%s",[row['schutte_nr'],'"Schutte"'])
+            db_command(cur,"UPDATE records SET person_id = %s WHERE _id = %s",[person_id,schutte['_id']])
+            db_command(cur,"DELETE FROM persons WHERE _id = %s",[schutte['person_id']])
+            raa = db_command(cur,"SELECT _id,person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name=%s",[row['id'],'"RAA"'])
+            db_command(cur,"UPDATE records SET person_id = %s WHERE _id = %s",[person_id,raa['_id']])
+            db_command(cur,"DELETE FROM persons WHERE _id = %s",[raa['person_id']])
             conn.commit()
 
     end_prog(0)
