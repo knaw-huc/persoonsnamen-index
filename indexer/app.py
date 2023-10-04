@@ -82,7 +82,7 @@ def get_detail():
 @app.route('/index', methods=['GET'])
 def index_persons():
     res = db.get_persons()
-    print(f'index {len(res}} persons') 
+    print(f'index {len(res)} persons') 
     idx = Indexer(config)
     teller = 0
     for elem in res:
@@ -98,7 +98,10 @@ def index_persons():
                 fullname = f'{name}'
         else:
             fullname = f'{givenname} {infix} {name}'
-#        print(fullname)
+        print(f'name: {name}')
+        print(f'fullname: {fullname}')
+        print(f'life_hint_begin: {life_hint_begin}')
+        print(f'life_hint_end: {life_hint_end}')
         idx.add_to_index({"fullname": fullname.strip()})
         idx.add_to_index({"name": name.strip()})
         if life_hint_begin and life_hint_begin!='':
