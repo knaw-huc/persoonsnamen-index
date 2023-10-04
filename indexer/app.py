@@ -99,11 +99,12 @@ def index_persons():
         else:
             fullname = f'{givenname} {infix} {name}'
 #        print(fullname)
-        idx.add_to_index({"name": fullname.strip()})
+        idx.add_to_index({"fullname": fullname.strip()})
+        idx.add_to_index({"name": name.strip()})
         if life_hint_begin and life_hint_begin!='':
-            idx.add_to_index({"life_hint_begin": fullname.strip()})
+            idx.add_to_index({"life_hint_begin": life_hint_begin})
         if life_hint_end and life_hint_end!='':
-            idx.add_to_index({"life_hint_end": fullname.strip()})
+            idx.add_to_index({"life_hint_end": life_hint_end})
         teller += 1
     return jsonify({'result': f'{teller} names indexed'})
 
