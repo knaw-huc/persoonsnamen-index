@@ -78,6 +78,11 @@ def get_detail():
     rec = request.args.get("rec")
     return json.dumps(db.detail(rec))
 
+def makeNotNull(field):
+    if field is None or field == "NULL":
+        return ""
+    else:
+        return field
 
 @app.route('/index', methods=['GET'])
 def index_persons():
@@ -86,29 +91,30 @@ def index_persons():
     idx = Indexer(config)
     teller = 0
     for elem in res:
+        p_id = elem ['id']
         name = elem['name']
         givenname = elem['givenname']
         infix = elem['infix']
-        life_hint_begin = elem['life_hint_begin']
-        life_hint_end = elem['life_hint_end']
+        life_hint_begin = makeNotNull(elem['life_hint_begin'])
+        life_hint_end = makeNotNull(elem['life_hint_end'])
         database = elem['database']
-        if not infix or infix == '':
-            if givenname:
-                fullname = f'{givenname} {name}'
-            else:
-                fullname = f'{name}'
-        else:
-            fullname = f'{givenname} {infix} {name}'
-#        print(f'''name: {name} - fullname: {fullname.strip()} - life_hint_begin: {life_hint_begin} - life_hint_end: {life_hint_end} - database: {database}
-#''')
-        data = {"fullname": fullname.strip()}
-        data["name"] = name.strip()
+        fullname = name
+        infix = makeNotNull(infix)
+        if not infix == '':
+            fullname = f'{infix} {fullname}'
+        givenname = makeNotNull(givenname)
+        if not givenname == '':
+            fullname = f'{givenname} {fullname}'
+        data = {"ID": p_id,
+                "name": name.strip(),
+                "fullname": fullname.strip()}
         if life_hint_begin and life_hint_begin!='':
             data["life_hint_begin"] = life_hint_begin
         if life_hint_end and life_hint_end!='':
             data["life_hint_end"] = life_hint_end
         if database and database!='':
             data["database"] = database
+        print(data)
         idx.add_to_index(data)
         teller += 1
     return jsonify({'result': f'{teller} names indexed'})
