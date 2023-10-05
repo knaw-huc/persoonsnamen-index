@@ -99,7 +99,7 @@ if __name__ == "__main__":
                     #                    
                     new_row = [id,name,infix,givenname,life_hint_begin,life_hint_end]
                     persons.append(new_row)
-                    records.append([id,f'{id}',f"{teller}","1" ])
+                    records.append([id,f'{id_link}',f"{teller}","1" ])
                     links.append([f'{teller}',href])
                     record_links.append([f"{teller}",f"{teller}"])
                     teller += 1
@@ -110,20 +110,32 @@ if __name__ == "__main__":
     output.write('1\t"RAA"\n')
     output.write("\\.\n\n")
 
+    output.write("ALTER SEQUENCE database__id_seq RESTART 3;")
+    output.write("\n\n")
+
     output.write(f'COPY persons (_id,name,infix,givenname,life_hint_begin,life_hint_end) FROM stdin;\n')
     for person in persons:
         output.write("\t".join(person) + "\n")
     output.write("\\.\n\n")
+
+    output.write("ALTER SEQUENCE persons__id_seq RESTART 21003;")
+    output.write("\n\n")
 
     output.write(f'COPY links (_id,href) FROM stdin;\n')
     for link in links:
         output.write("\t".join(link) + "\n")
     output.write("\\.\n\n")
 
+    output.write("ALTER SEQUENCE links__id_seq RESTART 21003;")
+    output.write("\n\n")
+
     output.write(f'COPY records (_id,id,person_id,database_id) FROM stdin;\n')
     for record in records:
         output.write("\t".join(record) + "\n")
     output.write("\\.\n\n")
+
+    output.write("ALTER SEQUENCE records__id_seq RESTART 21003;")
+    output.write("\n\n")
 
     output.write(f'COPY record_links (record_id,link_id) FROM stdin;\n')
     for record in record_links:
