@@ -34,8 +34,8 @@ CREATE TABLE database (
     name TEXT
 );
 
-ALTER TABLE records ADD FOREIGN KEY (person_id) REFERENCES persons;
-ALTER TABLE records ADD FOREIGN KEY (database_id) REFERENCES database;
-ALTER TABLE record_links ADD FOREIGN KEY (record_id) REFERENCES records;
-ALTER TABLE record_links ADD FOREIGN KEY (link_id) REFERENCES links;
+ALTER TABLE records ADD FOREIGN KEY (person_id) REFERENCES persons ON DELETE CASCADE;
+ALTER TABLE records ADD FOREIGN KEY (database_id) REFERENCES database ON DELETE CASCADE;
+ALTER TABLE record_links ADD FOREIGN KEY (record_id) REFERENCES records ON DELETE CASCADE;
+ALTER TABLE record_links ADD FOREIGN KEY (link_id) REFERENCES links ON DELETE CASCADE;
 
