@@ -60,7 +60,7 @@ def xls_file(filename, headerrow=0):
     links = []
     record_links = []
     last_id = ''
-    for rownum in range(sheet.nrows)[1:-1]:
+    for rownum in range(sheet.nrows)[1:]:
         row = sheet.row(rownum)
         #if rownum<5 or rownum>683:
             #stderr(rownum)
@@ -73,13 +73,16 @@ def xls_file(filename, headerrow=0):
             new_row.append(row[headers.index(col)].value)
         if len(new_row)>0:
             persons.append(new_row)
-            records.append([f"{teller}",f"{teller}",f'{id}','2'])
-            links.append([f"{teller}",row[headers.index('url')].value])
+            records.append([f"{teller}",f"{id}",f'{id}','2'])
+            try:
+                links.append([f"{teller}",row[headers.index('url')].value])
+            except:
+                links.append([f"{teller}",f'schutte/{id}'])
             record_links.append([f"{teller}",f"{teller}"])
             teller += 1
 
     output.write(f'COPY database (_id,name) FROM stdin;\n')
-    output.write('2\t"Schutte"\n')
+    output.write('2\tSchutte\n')
     output.write("\\.\n\n")
 
     output.write(f'COPY persons (_id,{", ".join(cols.values())}) FROM stdin;\n')
@@ -111,7 +114,7 @@ def arguments():
     ap = argparse.ArgumentParser(description='Read schutte xlsx to make postgres import file')
     ap.add_argument('-i', '--inputfile',
                     help="inputfile",
-                    default = "input/schutte_buitenland_met_lemma.xlsx" )
+                    default = "input/schutte_nl_in_buitenland.xlsx" )
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
                     default = f"schutte_data_{today}.sql" )

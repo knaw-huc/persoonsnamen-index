@@ -54,12 +54,15 @@ def get_connection():
     return conn,cur
 
 def db_command(cur,command,data):
+    print(command)
+    print(data)
     try:
         result = cur.execute(command,data)
+        print(result)
         return result
     except Exception as e:
         stderr(f'{e}')
-        stderr(f'command: {data}')
+        stderr(f'command: {command}')
         stderr(f'data: {data}')
     return ''
 
@@ -99,7 +102,7 @@ if __name__ == "__main__":
     with open(inputfile) as fd:
         reader = csv.DictReader(fd, delimiter="\t", quotechar='"')
         for row in reader:
-            #print(row)
+            print(row)
             naam = row['geslachtsnaam']
             infix = row['tussenvoegsel']
             givenname = row['voornaam']
@@ -108,10 +111,15 @@ if __name__ == "__main__":
             db_command(cur,"INSERT INTO persons (name, infix, givenname, life_hint_begin, life_hint_end) VALUES (%s,%s,%s,%s,%s)",[naam,infix,givenname,life_hint_begin,life_hint_end])
             cur.execute('SELECT LASTVAL()')
             person_id = cur.fetchone()[0]
-            schutte = db_command(cur,"SELECT _id,person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name=%s",[row['schutte_nr'],'"Schutte"'])
+            print(f'person_id: {person_id}')
+            # Hier de join eruit: we weten dan we Schutte zoeken en dat deze _id=2 is.
+            schutte = db_command(cur,"SELECT records._id as _id, person_id FROM records WHERE records.database_id = %s AND records.id = %s",[2,row['schutte_nr']])
+            #schutte = db_command(cur,"SELECT records._id as _id, person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name = %s",[row['schutte_nr'],'Schutte'])
+            # telkens is schutte None:
+            print(f'schutte: {schutte} ({schutte.__class__})')
             db_command(cur,"UPDATE records SET person_id = %s WHERE _id = %s",[person_id,schutte['_id']])
             db_command(cur,"DELETE FROM persons WHERE _id = %s",[schutte['person_id']])
-            raa = db_command(cur,"SELECT _id,person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name=%s",[row['id'],'"RAA"'])
+            raa = db_command(cur,"SELECT _id,person_id FROM records JOIN database ON records.database_id = database._id WHERE records.id = %s AND database.name=%s",[row['id'],'RAA'])
             db_command(cur,"UPDATE records SET person_id = %s WHERE _id = %s",[person_id,raa['_id']])
             db_command(cur,"DELETE FROM persons WHERE _id = %s",[raa['person_id']])
             conn.commit()
