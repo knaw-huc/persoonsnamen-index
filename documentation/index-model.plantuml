@@ -10,7 +10,7 @@ entity "Entity" as e {
   *_id : number <<generated>>
   --
   *label : text
-  *category: {'persoon', 'commissies', 'instellingen', 'hoedanigheden'}
+  *category: {'persoon', 'commissie', 'instelling', 'hoedanigheid'}
   ' hints are years in general
   activity_hint_begin: text 
   activity_hint_end: text
