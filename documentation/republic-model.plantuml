@@ -6,37 +6,37 @@ hide circle
 ' avoid problems with angled crows feet
 skinparam linetype ortho
 
-entity "Person" as p {
+entity "Entity" as e {
   *_id : number <<generated>>
   --
-  *name : text,
-  givename: text
-  life_hint_begin: text
-  life_hint_end: text
+  *name : text
+  *category: {'Persoon', 'Commissie', 'Instelling', 'Hoedanigheid'}
+  ' hints are years in general
+  activity_hint_begin: text 
+  activity_hint_end: text
+  provenance: uri
+  
 }
 
-entity "record" as r {
+entity "Label" as l {
   *_id : number <<generated>>
   --
-  * id
+  *label : text
 }
 
-entity "database" as db{
-  *_id : number <<generated>>
+entity "Persoon" as p {
+  'same id as the corresponding entity
+  *_id : number
   --
-  * name: text
-  ' waar leeft de database, etc
- }
-
-entity "link" as l {
-  *_id : number <<generated>>
-  --
-  href: anyURI
+  period_start : number
+  period_end : number
+  life_begin: number
+  life_end: number
+  province : text
+}
 }
 
-p ||-|{ r
-r }|..|| db
-r }|..o{ l
+e }|-{l
 
 @enduml
 
