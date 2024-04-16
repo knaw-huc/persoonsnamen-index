@@ -22,6 +22,7 @@ entity "Label" as l {
   *_id : number <<generated>>
   --
   *label : text
+  group : text
 }
 
 entity "Persoon" as p {
@@ -30,13 +31,12 @@ entity "Persoon" as p {
   --
   period_start : number
   period_end : number
-  life_begin: number
-  life_end: number
+  life_begin : number
+  life_end : number
   province : text
 }
-}
 
-e }|-{l
+e }|-{ l
+e ||-| p
 
 @enduml
-
