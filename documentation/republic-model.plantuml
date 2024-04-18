@@ -37,6 +37,6 @@ entity "Persoon" as p {
 }
 
 e }|-{ l
-e ||-| p
+e ||-o| p
 
 @enduml
